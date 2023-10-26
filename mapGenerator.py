@@ -10,12 +10,15 @@ RED = (255, 0, 0)
 ORANGE = (255, 165, 0)
 YELLOW = (255, 255, 0)
 CYAN = (0, 255, 255)
+GREY = (128, 128, 128)
 FROYALBLUE = (79, 132, 166)
+BLUE = (65, 105, 225)
 
 
-res = width, height = 1202, 723
-tile = 48
+res = width, height = 1200, 600
+tile = 60
 cols, rows = width // tile, height // tile
+pellet = p.image.load("Pac-Man Assets\Tiles\Pellet.png")
 
 class Cell:
     def __init__(self, x, y):
@@ -23,21 +26,24 @@ class Cell:
         self.y = y
         self.walls = {'top': True, 'right': True, 'bottom': True, 'left': True}
         self.visited = False
+        self.open = False
 
     def draw(self):
         x, y = self.x * tile, self.y * tile
         
         if self.visited:
-            p.draw.rect(sc, p.Color(BLACK), (x,y, tile, tile))
+            p.draw.rect(sc, BLACK, (x,y, tile, tile))
+            p.draw.circle(sc, YELLOW, (x + (tile // 2), y + (tile // 2)), 5)
+            self.open = True
 
         if self.walls['top']:
-            p.draw.line(sc, ORANGE, (x,y), (x + tile, y), 2)
+            p.draw.line(sc, BLUE, (x,y), (x + tile, y), 2)
         if self.walls['right']:
-            p.draw.line(sc, ORANGE, (x + tile, y), (x + tile, y + tile), 2)
+            p.draw.line(sc, BLUE, (x + tile, y), (x + tile, y + tile), 2)
         if self.walls['bottom']:
-            p.draw.line(sc, ORANGE, (x + tile, y + tile), (x, y + tile), 2)
+            p.draw.line(sc, BLUE, (x + tile, y + tile), (x, y + tile), 2)
         if self.walls['left']:
-            p.draw.line(sc, ORANGE, (x, y + tile), (x, y), 2)
+            p.draw.line(sc, BLUE, (x, y + tile), (x, y), 2)
 
     def drawCurrentCell(self):
         x = self.x * tile
@@ -46,11 +52,11 @@ class Cell:
 
     def checkCell(self, x, y):
         findIndex = lambda x, y: x + y * cols
-        if x < 0 or x > cols - 1 or y < 0 or y < rows - 1:
+        if x < 0 or x > cols - 1 or y < 0 or y > rows - 1:
             return False
         return gridCells[findIndex(x,y)]
     
-    def check_neighbors(self):
+    def checkNeighbors(self):
         neighbors = []
         top = self.checkCell(self.x, self.y - 1)
         right = self.checkCell(self.x + 1, self.y)
@@ -67,6 +73,8 @@ class Cell:
             neighbors.append(bottom)
 
         return choice(neighbors) if neighbors else False
+    
+
 
 
 gridCells = [Cell(col, row) for row in range(rows) for col in range(cols)]
@@ -82,13 +90,30 @@ def get_pixels_at(x, y, width, height, map):
     pixels.blit(map, (0,0), rect)
     return pixels
 
+def removeWalls(curr, next):
+    dx = curr.x - next.x
+    dy = curr.y - next.y
+    if dx == 1:
+        curr.walls['left'] = False
+        next.walls['right'] = False
+    elif dx == -1:
+        curr.walls['left'] = False
+        next.walls['right'] = False
+
+    if dy == 1:
+        curr.walls['top'] = False
+        curr.walls['bottom'] = False
+    elif dy == -1:
+        curr.walls['top'] = False
+        curr.walls['bottom'] = False
+
 
 p.init()
 sc = p.display.set_mode(res)
 clock =p.time.Clock()
 
 while True:
-    sc.fill(p.Color(BLACK))
+    sc.fill(p.Color(WHITE))
 
     for event in p.event.get():
         if event.type == p.QUIT:
@@ -98,10 +123,14 @@ while True:
     currCell.visited = True
     currCell.drawCurrentCell()
 
-    nextCell = currCell.check_neighbors()
-    if True:
+    nextCell = currCell.checkNeighbors()
+    if nextCell:
         nextCell.visited = True
+        stack.append(currCell)
+        removeWalls(currCell, nextCell)
         currCell = nextCell
+    elif stack:
+        currCell = stack.pop()
 
     p.display.flip()
     clock.tick(60)
