@@ -32,7 +32,7 @@ class Cell:
         x, y = self.x * tile, self.y * tile
         
         if self.visited:
-            p.draw.rect(sc, BLACK, (x,y, tile, tile))
+            p.draw.rect(sc, BLACK, (x,y, tile + 5, tile))
             p.draw.circle(sc, YELLOW, (x + (tile // 2), y + (tile // 2)), 5)
             self.open = True
 
@@ -97,15 +97,48 @@ def removeWalls(curr, next):
         curr.walls['left'] = False
         next.walls['right'] = False
     elif dx == -1:
-        curr.walls['left'] = False
-        next.walls['right'] = False
+        curr.walls['right'] = False
+        next.walls['left'] = False
 
     if dy == 1:
         curr.walls['top'] = False
-        curr.walls['bottom'] = False
+        next.walls['bottom'] = False
     elif dy == -1:
-        curr.walls['top'] = False
         curr.walls['bottom'] = False
+        next.walls['top'] = False
+
+
+def backtrack():
+    if stack:
+        cell_to_backtrack = stack[-1]
+        unvisited_neighbors = cell_to_backtrack.checkNeighbors()
+
+        if unvisited_neighbors:
+            if isinstance(unvisited_neighbors, list):
+                # If there are multiple unvisited neighbors, choose one
+                unvisited_neighbors = [neighbor for neighbor in unvisited_neighbors if not neighbor.visited]
+
+                if unvisited_neighbors:
+                    next_cell = choice(unvisited_neighbors)
+                    removeWalls(cell_to_backtrack, next_cell)
+                    next_cell.visited = True
+                    stack.append(next_cell)
+                else:
+                    stack.pop()
+                return cell_to_backtrack if stack else None
+
+            elif isinstance(unvisited_neighbors, Cell):
+                # If there's a single unvisited neighbor, choose it
+                next_cell = unvisited_neighbors
+                removeWalls(cell_to_backtrack, next_cell)
+                next_cell.visited = True
+                stack.append(next_cell)
+                return cell_to_backtrack if stack else None
+        else:
+            stack.pop()
+            return cell_to_backtrack if stack else None
+
+    return None
 
 
 p.init()
@@ -120,17 +153,18 @@ while True:
             exit()
 
     [cell.draw() for cell in gridCells]
-    currCell.visited = True
-    currCell.drawCurrentCell()
+    if currCell != None:
+        currCell.visited = True
+        currCell.drawCurrentCell()
 
-    nextCell = currCell.checkNeighbors()
+        nextCell = currCell.checkNeighbors()
     if nextCell:
         nextCell.visited = True
         stack.append(currCell)
         removeWalls(currCell, nextCell)
         currCell = nextCell
     elif stack:
-        currCell = stack.pop()
+        currCell = backtrack()
 
     p.display.flip()
     clock.tick(60)
