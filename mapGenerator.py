@@ -37,13 +37,13 @@ class Cell:
             self.open = True
 
         if self.walls['top']:
-            p.draw.line(sc, BLUE, (x,y), (x + tile, y), 2)
+            p.draw.line(sc, BLUE, (x,y), (x + tile, y), 5)
         if self.walls['right']:
-            p.draw.line(sc, BLUE, (x + tile, y), (x + tile, y + tile), 2)
+            p.draw.line(sc, BLUE, (x + tile, y), (x + tile, y + tile), 5)
         if self.walls['bottom']:
-            p.draw.line(sc, BLUE, (x + tile, y + tile), (x, y + tile), 2)
+            p.draw.line(sc, BLUE, (x + tile, y + tile), (x, y + tile), 5)
         if self.walls['left']:
-            p.draw.line(sc, BLUE, (x, y + tile), (x, y), 2)
+            p.draw.line(sc, BLUE, (x, y + tile), (x, y), 5)
 
     def drawCurrentCell(self):
         x = self.x * tile
@@ -137,8 +137,6 @@ def backtrack():
         else:
             stack.pop()
             return cell_to_backtrack if stack else None
-
-    return None
 
 
 p.init()
