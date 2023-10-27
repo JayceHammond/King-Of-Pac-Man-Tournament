@@ -28,11 +28,11 @@ class Cell:
         self.visited = False
         self.open = False
 
-    def draw(self):
+    def draw(self, sc):
         x, y = self.x * tile, self.y * tile
         
         if self.visited:
-            p.draw.rect(sc, BLACK, (x,y, tile + 5, tile))
+            p.draw.rect(sc, BLACK, (x,y, tile, tile))
             p.draw.circle(sc, YELLOW, (x + (tile // 2), y + (tile // 2)), 5)
             self.open = True
 
@@ -45,7 +45,7 @@ class Cell:
         if self.walls['left']:
             p.draw.line(sc, BLUE, (x, y + tile), (x, y), 5)
 
-    def drawCurrentCell(self):
+    def drawCurrentCell(self,sc):
         x = self.x * tile
         y = self.y * tile
         p.draw.rect(sc, FROYALBLUE, (x + 2, y + 2, tile - 2, tile - 2))
@@ -84,12 +84,6 @@ stack = []
 
 tileSheet = "Pac-Man Assets\Tiles\MazeParts.png"
 
-def get_pixels_at(x, y, width, height, map):
-    rect = p.Rect(x, y, width, height)
-    pixels = p.Surface((width, height))
-    pixels.blit(map, (0,0), rect)
-    return pixels
-
 def removeWalls(curr, next):
     dx = curr.x - next.x
     dy = curr.y - next.y
@@ -113,21 +107,9 @@ def backtrack():
         cell_to_backtrack = stack[-1]
         unvisited_neighbors = cell_to_backtrack.checkNeighbors()
 
-        if unvisited_neighbors:
-            if isinstance(unvisited_neighbors, list):
-                # If there are multiple unvisited neighbors, choose one
-                unvisited_neighbors = [neighbor for neighbor in unvisited_neighbors if not neighbor.visited]
 
-                if unvisited_neighbors:
-                    next_cell = choice(unvisited_neighbors)
-                    removeWalls(cell_to_backtrack, next_cell)
-                    next_cell.visited = True
-                    stack.append(next_cell)
-                else:
-                    stack.pop()
-                return cell_to_backtrack if stack else None
 
-            elif isinstance(unvisited_neighbors, Cell):
+        if isinstance(unvisited_neighbors, Cell):
                 # If there's a single unvisited neighbor, choose it
                 next_cell = unvisited_neighbors
                 removeWalls(cell_to_backtrack, next_cell)
@@ -137,23 +119,17 @@ def backtrack():
         else:
             stack.pop()
             return cell_to_backtrack if stack else None
+        
 
 
-p.init()
-sc = p.display.set_mode(res)
-clock =p.time.Clock()
 
-while True:
-    sc.fill(p.Color(WHITE))
-
-    for event in p.event.get():
-        if event.type == p.QUIT:
-            exit()
-
-    [cell.draw() for cell in gridCells]
+def mapMain(screen):
+    global currCell
+    global nextCell
+    [cell.draw(screen) for cell in gridCells]
     if currCell != None:
         currCell.visited = True
-        currCell.drawCurrentCell()
+        currCell.drawCurrentCell(screen)
 
         nextCell = currCell.checkNeighbors()
     if nextCell:
@@ -164,5 +140,3 @@ while True:
     elif stack:
         currCell = backtrack()
 
-    p.display.flip()
-    clock.tick(60)
