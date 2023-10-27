@@ -27,6 +27,13 @@ pacmanSheetD = p.image.load("Pac-Man Assets\Pac-Man Sprites\pacManD.png")
 
 global frameNum
 global frameCount
+global pacManPos
+global pacManPosX
+global pacManPosY
+global pacManSpeed
+pacManPosX = 0
+pacManPosY = 0
+pacManSpeed = 6
 frameNum = 0
 frameCount = 0
 
@@ -39,11 +46,11 @@ def getImage(sheet, frame, width, height, scale, color):
 
     return image.convert_alpha()
 
-def animator(sheet, spriteWidth, spriteHeight, scalar, color):
+def animator(sheet, spriteWidth, spriteHeight, scalar, color, pos):
     global frameNum
     global frameCount
     #show frame img
-    sc.blit(getImage(sheet, frameNum, spriteWidth, spriteHeight, scalar, color), (0,0))
+    sc.blit(getImage(sheet, frameNum, spriteWidth, spriteHeight, scalar, color), pos)
     if frameCount == 0:
         frameNum += 1
     if frameNum > 2:
@@ -53,7 +60,42 @@ def animator(sheet, spriteWidth, spriteHeight, scalar, color):
     if frameCount == 12:
         frameCount = 0
 
+def pacManController(xDir, yDir, currDirAnim):
+    if event.type == p.KEYDOWN:
+        #CONTROLS
+        if event.key == p.K_w:
+            xDir = 0
+            yDir = -1
+        if event.key == p.K_s:
+            xDir = 0
+            yDir = 1
+        if event.key == p.K_d:
+            yDir = 0
+            xDir = 1
+        if event.key == p.K_a:
+            yDir = 0
+            xDir = -1
 
+    return xDir, yDir, currDirAnim
+
+def checkCollision(posX, posY):
+    global pacManPosX
+    global pacManPosY
+    if posX < 0:
+        pacManPosX = 1
+    if posX + 48 > width:
+        pacManPosX = width - 48
+    if posY < 0:
+        pacManPosY = 1
+    if posY + 48 > height:
+        pacManPosY = height - 48
+
+
+
+
+currDirAnim = pacmanSheetU
+xDir = 0
+yDir = 0
 
 while True:
     sc.fill(p.Color(BLUE))
@@ -61,8 +103,27 @@ while True:
     for event in p.event.get():
         if event.type == p.QUIT:
             exit()
+        xDir, yDir, currDirAnim = pacManController(xDir, yDir, currDirAnim)
+
+    if xDir == 1:
+        pacManPosX += pacManSpeed 
+        currDirAnim = pacmanSheetR
+    if yDir == -1:
+        pacManPosY -= pacManSpeed 
+        currDirAnim = pacmanSheetU
+    if xDir == -1:
+        pacManPosX -= pacManSpeed 
+        currDirAnim = pacmanSheetL
+    if yDir == 1:
+        pacManPosY += pacManSpeed 
+        currDirAnim = pacmanSheetD
+
+
+
     mapMain(sc)
-    animator(pacmanSheetD, 48, 48, 1, BLACK)
+    checkCollision(pacManPosX, pacManPosY)
+    pacManPos = (pacManPosX, pacManPosY)
+    animator(currDirAnim, 48, 48, 1, BLACK, pacManPos)
 
     p.display.flip()
     clock.tick(60)
