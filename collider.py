@@ -5,18 +5,17 @@ import numpy
 import random as r
 
 class Collider:
-    def __init__(self, parent):
-        self.posx = parent.posx
-        self.posy = parent.posy
-        self.width = parent.width
-        self.height = parent.height
-        self.center = (self.posx, self.posy)
+    def __init__(self, posx, posy, width, height):
+        self.posx = posx
+        self.posy = posy
+        self.width = width
+        self.height = height
     
-    def checkCollision(self, objArray, xDir, parent):
+    def checkCollision(self, objArray):
         #Calculate the distance between the collider and the center of the obj
         collided = False
         for obj in objArray:
-            distance = math.sqrt((parent.posx - obj.posx) ** 2 + (parent.posy - obj.posy) ** 2)
+            distance = math.sqrt((self.posx - obj.posx) ** 2 + (self.posy - obj.posy) ** 2)
 
             #Check if a collision has occurred
             if distance < (self.width / 2) + (obj.width / 2):

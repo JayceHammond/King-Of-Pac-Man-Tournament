@@ -120,7 +120,10 @@ while True:
 
 
 
-    mapMain(sc)
+    wallStack = mapMain(sc)
+    #if wallStack != None:
+        #print(len(wallStack))
+
     checkCollision(pacManPosX, pacManPosY)
     pacManPos = (pacManPosX, pacManPosY)
     animator(currDirAnim, 48, 48, 1, BLACK, pacManPos)

@@ -1,6 +1,7 @@
 import pygame as p
 import numpy
 from random import choice
+from collider import Collider
 
 # Define some colors
 BLACK = (0, 0, 0)
@@ -45,6 +46,8 @@ class Cell:
         if self.walls['left']:
             p.draw.line(sc, BLUE, (x, y + tile), (x, y), 5)
 
+        
+
     def drawCurrentCell(self,sc):
         x = self.x * tile
         y = self.y * tile
@@ -80,6 +83,7 @@ class Cell:
 gridCells = [Cell(col, row) for row in range(rows) for col in range(cols)]
 currCell = gridCells[0]
 stack = []
+wallStack = []
         
 
 tileSheet = "Pac-Man Assets\Tiles\MazeParts.png"
@@ -122,10 +126,11 @@ def backtrack():
         
 
 
-
+runnable = True
 def mapMain(screen):
     global currCell
     global nextCell
+    doneBool = False
     [cell.draw(screen) for cell in gridCells]
     if currCell != None:
         currCell.visited = True
@@ -139,4 +144,11 @@ def mapMain(screen):
         currCell = nextCell
     elif stack:
         currCell = backtrack()
+    else:
+        doneBool = True
+
+    if doneBool == True:
+        [print(cell.x) for cell in gridCells if cell.walls["top"] == True]
+        doneBool = False
+        return wallStack
 
