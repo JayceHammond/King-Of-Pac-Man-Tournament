@@ -130,6 +130,7 @@ runnable = True
 def mapMain(screen):
     global currCell
     global nextCell
+    global doneBool
     doneBool = False
     [cell.draw(screen) for cell in gridCells]
     if currCell != None:
@@ -148,7 +149,13 @@ def mapMain(screen):
         doneBool = True
 
     if doneBool == True:
-        [print(cell.x) for cell in gridCells if cell.walls["top"] == True]
-        doneBool = False
-        return wallStack
+        if len(wallStack) <= 200:
+            #[wallStack.append((cell.x, cell.y)) for cell in gridCells if cell.walls["right"] == True]
+            for cell in gridCells:
+                if cell.walls["left"] == True:
+                    p.draw.rect(screen, GREEN, (cell.x * tile, cell.y * tile, 2, 60))
+                if cell.walls["top"] == True:
+                    p.draw.rect(screen, GREEN, (cell.x * tile, cell.y * tile, 60, 2))
+            doneBool = False
+            return wallStack
 

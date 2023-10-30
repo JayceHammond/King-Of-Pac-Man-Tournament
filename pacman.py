@@ -121,8 +121,11 @@ while True:
 
 
     wallStack = mapMain(sc)
-    #if wallStack != None:
-        #print(len(wallStack))
+    if wallStack != None:
+        for wall in wallStack:
+            #print(wall[0])
+            print(pacManPosX)
+
 
     checkCollision(pacManPosX, pacManPosY)
     pacManPos = (pacManPosX, pacManPosY)
