@@ -127,7 +127,7 @@ def backtrack():
 
 
 runnable = True
-def mapMain(screen):
+def mapMain(screen, pacMan):
     global currCell
     global nextCell
     global doneBool
@@ -149,13 +149,16 @@ def mapMain(screen):
         doneBool = True
 
     if doneBool == True:
+        collision = False
         if len(wallStack) <= 200:
             #[wallStack.append((cell.x, cell.y)) for cell in gridCells if cell.walls["right"] == True]
             for cell in gridCells:
                 if cell.walls["left"] == True:
-                    p.draw.rect(screen, GREEN, (cell.x * tile, cell.y * tile, 2, 60))
+                    leftWall = p.draw.rect(screen, GREEN, (cell.x * tile, cell.y * tile, 5, 60))
+                    wallStack.append(leftWall)
                 if cell.walls["top"] == True:
-                    p.draw.rect(screen, GREEN, (cell.x * tile, cell.y * tile, 60, 2))
+                    topWall = p.draw.rect(screen, GREEN, (cell.x * tile, cell.y * tile, 60, 5))
+                    wallStack.append(topWall)
             doneBool = False
-            return wallStack
+        return wallStack
 

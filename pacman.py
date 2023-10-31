@@ -31,9 +31,10 @@ global pacManPos
 global pacManPosX
 global pacManPosY
 global pacManSpeed
-pacManPosX = 0
-pacManPosY = 0
-pacManSpeed = 6
+pacManPosX = 5
+pacManPosY = 5
+pacManPos = (pacManPosX, pacManPosY)
+pacManSpeed = 3
 frameNum = 0
 frameCount = 0
 
@@ -61,26 +62,33 @@ def animator(sheet, spriteWidth, spriteHeight, scalar, color, pos):
         frameCount = 0
 
 def pacManController(xDir, yDir, currDirAnim):
+    global pacManSpeed
     if event.type == p.KEYDOWN:
         #CONTROLS
         if event.key == p.K_w:
             xDir = 0
             yDir = -1
+            pacManSpeed = 3
         if event.key == p.K_s:
             xDir = 0
             yDir = 1
+            pacManSpeed = 3
         if event.key == p.K_d:
             yDir = 0
             xDir = 1
+            pacManSpeed = 3
         if event.key == p.K_a:
             yDir = 0
             xDir = -1
+            pacManSpeed = 3
 
     return xDir, yDir, currDirAnim
 
 def checkCollision(posX, posY):
     global pacManPosX
     global pacManPosY
+    global colPoint
+    colPoint = (0,0)
     if posX < 0:
         pacManPosX = 1
     if posX + 48 > width:
@@ -97,6 +105,7 @@ currDirAnim = pacmanSheetU
 xDir = 0
 yDir = 0
 
+
 while True:
     sc.fill(p.Color(BLUE))
 
@@ -105,8 +114,9 @@ while True:
             exit()
         xDir, yDir, currDirAnim = pacManController(xDir, yDir, currDirAnim)
 
+
     if xDir == 1:
-        pacManPosX += pacManSpeed 
+        pacManPosX += pacManSpeed
         currDirAnim = pacmanSheetR
     if yDir == -1:
         pacManPosY -= pacManSpeed 
@@ -118,13 +128,23 @@ while True:
         pacManPosY += pacManSpeed 
         currDirAnim = pacmanSheetD
 
-
-
-    wallStack = mapMain(sc)
+    wallStack = mapMain(sc, pacManPos)
+    pacmanCol = p.draw.rect(sc, BLACK, (pacManPosX + 5, pacManPosY, 45, 45), 1)
     if wallStack != None:
         for wall in wallStack:
-            #print(wall[0])
-            print(pacManPosX)
+            if pacmanCol.colliderect(wall):
+                if xDir == 1:
+                    pacManSpeed = 0
+                    pacManPosX -= 3
+                elif xDir == -1:
+                    pacManSpeed = 0
+                    pacManPosX += 3
+                elif yDir == 1:
+                    pacManSpeed = 0
+                    pacManPosY -= 3
+                elif yDir == -1:
+                    pacManSpeed = 0
+                    pacManPosY += 3
 
 
     checkCollision(pacManPosX, pacManPosY)
