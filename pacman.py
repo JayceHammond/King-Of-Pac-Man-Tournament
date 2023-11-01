@@ -4,6 +4,7 @@ import random as r
 from random import choice
 from mapGenerator import mapMain
 from mapGenerator import getDoneBool
+from mapGenerator import getPelletStack
 from ghost import Ghost
 
 # Define some colors
@@ -47,6 +48,9 @@ pacManPosX = 5
 pacManPosY = 5
 pacManPos = (pacManPosX, pacManPosY)
 pacManSpeed = 3
+
+pelletStack = getPelletStack()
+
 frameNum = 0
 frameCount = 0
 
@@ -116,38 +120,39 @@ def moveGhost(ghostPosX, ghostPosY, ghostSpeed):
     global ghostDirX
     global ghostDirY
 
-    choice = r.choice(wanderChoice)
-    
-    if ghostDirX == 1:
-        ghostPosX += ghostSpeed * ghostDirX
-        spawnGhost(redGhostPosX, redGhostPosY, 0)
-    if ghostDirX == -1:
-        ghostPosX += ghostSpeed * ghostDirX
-        spawnGhost(redGhostPosX, redGhostPosY, 3)
-    if ghostDirY == 1:
-        ghostPosY += ghostSpeed * ghostDirY
-        spawnGhost(redGhostPosX, redGhostPosY, 1)
-    if ghostDirY == -1:
-        ghostPosY += ghostSpeed * ghostDirY
-        spawnGhost(redGhostPosX, redGhostPosY, 1)
+    if getDoneBool() == True:
+        choice = 0
+        lock = True
+        if choice == 0:
+            if ghostDirX == 1:
+                ghostPosX += ghostSpeed * ghostDirX
+                spawnGhost(ghostPosX, ghostPosY, 0)
+            if ghostDirX == -1:
+                ghostPosX += ghostSpeed * ghostDirX
+                spawnGhost(ghostPosX, ghostPosY, 3)
 
-    if ghostPosX < 0:
-        ghostPosX = 1
-        ghostDirX *= -1
-    if ghostPosX + 48 > width:
-        ghostPosX = width - 48
-        ghostDirX *= -1
-    if ghostPosY < 0:
-        ghostPosY = 1
-        ghostDirY *= -1
-    if ghostPosY + 48 > height:
-        ghostPosY = height - 48
-        ghostDirY *= -1
+    #    if choice == 1:
+    #        if ghostDirY == 1:
+    #            ghostPosY += ghostSpeed * ghostDirY
+    #            spawnGhost(redGhostPosX, redGhostPosY, 1)
+    #        if ghostDirY == -1:
+    #            ghostPosY += ghostSpeed * ghostDirY
+    #            spawnGhost(redGhostPosX, redGhostPosY, 1)
 
-    if choice == ghostDirX:
-        return ghostDirX
-    if choice == ghostDirY:
-        return ghostDirY
+        if ghostPosX < 0:
+            ghostPosX = 1
+            ghostDirX *= -1
+        if ghostPosX + 48 > width:
+            ghostPosX = width - 48
+            ghostDirX *= -1
+    #    if ghostPosY < 0:
+    #        ghostPosY = 1
+    #        ghostDirY *= -1
+    #    if ghostPosY + 48 > height:
+    #        ghostPosY = height - 48
+    #        ghostDirY *= -1
+
+    return ghostPosX
 
 
 currDirAnim = pacmanSheetU
@@ -180,6 +185,7 @@ while True:
 
     wallStack = mapMain(sc, pacManPos)
     pacmanCol = p.draw.rect(sc, BLACK, (pacManPosX + 5, pacManPosY, 45, 45), 1)
+    redGhostCol = p.draw.rect(sc, BLACK, (redGhostPosX + 5, redGhostPosY, 45, 45), 1)
     if wallStack != None:
         for wall in wallStack:
             if pacmanCol.colliderect(wall):
@@ -196,11 +202,32 @@ while True:
                     pacManSpeed = 0
                     pacManPosY += 3
 
+            if redGhostCol.colliderect(wall):
+                if xDir == 1:
+                    redGhostSpeed = 0
+                    redGhostPosX -= 3
+                elif xDir == -1:
+                    redGhostSpeed = 0
+                    redGhostPosX += 3
+                elif yDir == 1:
+                    redGhostSpeed = 0
+                    redGhostPosY -= 3
+                elif yDir == -1:
+                    redGhostSpeed = 0
+                    redGhostPosY += 3
+
+        for pellet in pelletStack:
+            if pacmanCol.colliderect(pellet):
+                pelletStack.remove(pellet)
+                print(len(pelletStack))
+
+    
 
     checkCollision(pacManPosX, pacManPosY)
+    redGhostPosX = moveGhost(redGhostPosX, redGhostPosY, redGhostSpeed)
     pacManPos = (pacManPosX, pacManPosY)
     animator(currDirAnim, 48, 48, 1, BLACK, pacManPos)
-    redGhostPosX = moveGhost(redGhostPosX, redGhostPosY, redGhostSpeed)
+    
 
 
     

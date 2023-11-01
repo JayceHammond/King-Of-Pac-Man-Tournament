@@ -20,6 +20,9 @@ res = width, height = 1200, 600
 tile = 60
 cols, rows = width // tile, height // tile
 pellet = p.image.load("Pac-Man Assets\Tiles\Pellet.png")
+pelletStack = []
+global updatePellets
+updatePellets = True
 global doneBool
 doneBool = False
 
@@ -27,16 +30,16 @@ class Cell:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.walls = {'top': True, 'right': True, 'bottom': True, 'left': True}
+        self.walls = {'top': True, 'right': True, 'bottom': True, 'left': True, 'pellet': True}
         self.visited = False
         self.open = False
 
     def draw(self, sc):
+        global updatePellets
         x, y = self.x * tile, self.y * tile
         
         if self.visited:
             p.draw.rect(sc, BLACK, (x,y, tile, tile))
-            p.draw.circle(sc, YELLOW, (x + (tile // 2), y + (tile // 2)), 5)
             self.open = True
         if self.walls['top']:
             p.draw.line(sc, BLUE, (x,y), (x + tile, y), 5)
@@ -46,6 +49,14 @@ class Cell:
             p.draw.line(sc, BLUE, (x + tile, y + tile), (x, y + tile), 5)
         if self.walls['left']:
             p.draw.line(sc, BLUE, (x, y + tile), (x, y), 5)
+        if self.walls['pellet']:
+            if updatePellets:
+                pelletStack.append(p.draw.circle(sc, YELLOW, (x + (tile // 2), y + (tile // 2)), 5))
+                if len(pelletStack) == 200:
+                    updatePellets = False
+            else:
+                for pellet in pelletStack:
+                    p.draw.circle(sc, YELLOW, (pellet[0], pellet[1]), 5)
 
         
 
@@ -128,6 +139,9 @@ def backtrack():
 
 def getDoneBool():
     return doneBool
+
+def getPelletStack():
+    return pelletStack
         
 
 
@@ -155,8 +169,9 @@ def mapMain(screen, pacMan):
 
     if doneBool == True:
         collision = False
+        global updatePellets
         if len(wallStack) <= 200:
-            for cell in gridCells:
+            for cell in gridCells:      
                 if cell.walls["left"] == True:
                     leftWall = p.draw.rect(screen, GREEN, (cell.x * tile, cell.y * tile, 5, 60))
                     wallStack.append(leftWall)
