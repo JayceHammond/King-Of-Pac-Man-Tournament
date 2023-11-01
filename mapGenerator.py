@@ -20,6 +20,8 @@ res = width, height = 1200, 600
 tile = 60
 cols, rows = width // tile, height // tile
 pellet = p.image.load("Pac-Man Assets\Tiles\Pellet.png")
+global doneBool
+doneBool = False
 
 class Cell:
     def __init__(self, x, y):
@@ -36,7 +38,6 @@ class Cell:
             p.draw.rect(sc, BLACK, (x,y, tile, tile))
             p.draw.circle(sc, YELLOW, (x + (tile // 2), y + (tile // 2)), 5)
             self.open = True
-
         if self.walls['top']:
             p.draw.line(sc, BLUE, (x,y), (x + tile, y), 5)
         if self.walls['right']:
@@ -123,6 +124,10 @@ def backtrack():
         else:
             stack.pop()
             return cell_to_backtrack if stack else None
+
+
+def getDoneBool():
+    return doneBool
         
 
 
@@ -151,7 +156,6 @@ def mapMain(screen, pacMan):
     if doneBool == True:
         collision = False
         if len(wallStack) <= 200:
-            #[wallStack.append((cell.x, cell.y)) for cell in gridCells if cell.walls["right"] == True]
             for cell in gridCells:
                 if cell.walls["left"] == True:
                     leftWall = p.draw.rect(screen, GREEN, (cell.x * tile, cell.y * tile, 5, 60))

@@ -1,7 +1,10 @@
 import pygame as p
 import numpy
+import random as r
 from random import choice
 from mapGenerator import mapMain
+from mapGenerator import getDoneBool
+from ghost import Ghost
 
 # Define some colors
 BLACK = (0, 0, 0)
@@ -25,9 +28,18 @@ pacmanSheetL = p.image.load("Pac-Man Assets\Pac-Man Sprites\pacManL.png")
 pacmanSheetU = p.image.load("Pac-Man Assets\Pac-Man Sprites\pacManU.png")
 pacmanSheetD = p.image.load("Pac-Man Assets\Pac-Man Sprites\pacManD.png")
 
+
+global ghostDirX
+global ghostDirY
+ghostDirY = 1
+ghostDirX = 1
+wanderChoice = [ghostDirX, ghostDirY]
+redGhostPosX = r.randint(0, 1200)
+redGhostPosY = r.randint(0, 600)
+redGhostSpeed = 3
+
 global frameNum
 global frameCount
-global pacManPos
 global pacManPosX
 global pacManPosY
 global pacManSpeed
@@ -63,32 +75,31 @@ def animator(sheet, spriteWidth, spriteHeight, scalar, color, pos):
 
 def pacManController(xDir, yDir, currDirAnim):
     global pacManSpeed
-    if event.type == p.KEYDOWN:
-        #CONTROLS
-        if event.key == p.K_w:
-            xDir = 0
-            yDir = -1
-            pacManSpeed = 3
-        if event.key == p.K_s:
-            xDir = 0
-            yDir = 1
-            pacManSpeed = 3
-        if event.key == p.K_d:
-            yDir = 0
-            xDir = 1
-            pacManSpeed = 3
-        if event.key == p.K_a:
-            yDir = 0
-            xDir = -1
-            pacManSpeed = 3
+    if getDoneBool() == True:
+        if event.type == p.KEYDOWN:
+            #CONTROLS
+            if event.key == p.K_w:
+                xDir = 0
+                yDir = -1
+                pacManSpeed = 3
+            if event.key == p.K_s:
+                xDir = 0
+                yDir = 1
+                pacManSpeed = 3
+            if event.key == p.K_d:
+                yDir = 0
+                xDir = 1
+                pacManSpeed = 3
+            if event.key == p.K_a:
+                yDir = 0
+                xDir = -1
+                pacManSpeed = 3
 
     return xDir, yDir, currDirAnim
 
 def checkCollision(posX, posY):
     global pacManPosX
     global pacManPosY
-    global colPoint
-    colPoint = (0,0)
     if posX < 0:
         pacManPosX = 1
     if posX + 48 > width:
@@ -98,13 +109,52 @@ def checkCollision(posX, posY):
     if posY + 48 > height:
         pacManPosY = height - 48
 
+def spawnGhost(posX, posY, type):
+    sc.blit(getImage(ghostSpriteSheet, type, 48, 48, 1, BLACK), (posX, posY))
 
+def moveGhost(ghostPosX, ghostPosY, ghostSpeed):
+    global ghostDirX
+    global ghostDirY
+
+    choice = r.choice(wanderChoice)
+    
+    if ghostDirX == 1:
+        ghostPosX += ghostSpeed * ghostDirX
+        spawnGhost(redGhostPosX, redGhostPosY, 0)
+    if ghostDirX == -1:
+        ghostPosX += ghostSpeed * ghostDirX
+        spawnGhost(redGhostPosX, redGhostPosY, 3)
+    if ghostDirY == 1:
+        ghostPosY += ghostSpeed * ghostDirY
+        spawnGhost(redGhostPosX, redGhostPosY, 1)
+    if ghostDirY == -1:
+        ghostPosY += ghostSpeed * ghostDirY
+        spawnGhost(redGhostPosX, redGhostPosY, 1)
+
+    if ghostPosX < 0:
+        ghostPosX = 1
+        ghostDirX *= -1
+    if ghostPosX + 48 > width:
+        ghostPosX = width - 48
+        ghostDirX *= -1
+    if ghostPosY < 0:
+        ghostPosY = 1
+        ghostDirY *= -1
+    if ghostPosY + 48 > height:
+        ghostPosY = height - 48
+        ghostDirY *= -1
+
+    if choice == ghostDirX:
+        return ghostDirX
+    if choice == ghostDirY:
+        return ghostDirY
 
 
 currDirAnim = pacmanSheetU
 xDir = 0
 yDir = 0
-
+#ghost = Ghost(48, 48)
+ghostSpriteSheet = p.image.load("Pac-Man Assets\Ghosts\GhostSpriteSheet.png")
 
 while True:
     sc.fill(p.Color(BLUE))
@@ -150,6 +200,10 @@ while True:
     checkCollision(pacManPosX, pacManPosY)
     pacManPos = (pacManPosX, pacManPosY)
     animator(currDirAnim, 48, 48, 1, BLACK, pacManPos)
+    redGhostPosX = moveGhost(redGhostPosX, redGhostPosY, redGhostSpeed)
+
+
+    
 
     p.display.flip()
     clock.tick(60)
