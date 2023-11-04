@@ -51,12 +51,10 @@ class Cell:
             p.draw.line(sc, BLUE, (x, y + tile), (x, y), 5)
         if self.walls['pellet']:
             if updatePellets:
-                pelletStack.append(p.draw.circle(sc, YELLOW, (x + (tile // 2), y + (tile // 2)), 5))
+                pelletStack.append((x + (tile // 2), y + (tile // 2)))
                 if len(pelletStack) == 200:
                     updatePellets = False
-            else:
-                for pellet in pelletStack:
-                    p.draw.circle(sc, YELLOW, (pellet[0], pellet[1]), 5)
+            p.draw.circle(sc, YELLOW, (x + (tile // 2), (y + (tile // 2))), 5)
 
         
 

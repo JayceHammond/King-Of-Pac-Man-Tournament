@@ -217,7 +217,7 @@ while True:
                     redGhostPosY += 3
 
         for pellet in pelletStack:
-            if pacmanCol.colliderect(pellet):
+            if pacmanCol.collidepoint(pellet):
                 pelletStack.remove(pellet)
                 print(len(pelletStack))
 
@@ -234,3 +234,4 @@ while True:
 
     p.display.flip()
     clock.tick(60)
+    print(clock.get_fps())
