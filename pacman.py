@@ -2,9 +2,7 @@ import pygame as p
 import numpy
 import random as r
 from random import choice
-from mapGenerator import mapMain
-from mapGenerator import getDoneBool
-from mapGenerator import getPelletStack
+from mapGenerator import mapMain, getDoneBool, getGridCells, getPelletStack
 from ghost import Ghost
 
 # Define some colors
@@ -50,6 +48,7 @@ pacManPos = (pacManPosX, pacManPosY)
 pacManSpeed = 3
 
 pelletStack = getPelletStack()
+gridCells = getGridCells()
 
 frameNum = 0
 frameCount = 0
@@ -218,8 +217,7 @@ while True:
 
         for pellet in pelletStack:
             if pacmanCol.collidepoint(pellet):
-                pelletStack.remove(pellet)
-                print(len(pelletStack))
+                gridCells[pelletStack.index(pellet)].walls['pellet'] = False
 
     
 
@@ -234,4 +232,4 @@ while True:
 
     p.display.flip()
     clock.tick(60)
-    print(clock.get_fps())
+    #print(clock.get_fps())

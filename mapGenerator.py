@@ -55,8 +55,9 @@ class Cell:
                 pelletStack.append((x + (tile // 2), y + (tile // 2)))
                 if len(pelletStack) == 200:
                     updatePellets = False
-            #if self.index != None and pelletStack[self.index]:
-                #p.draw.circle(sc, YELLOW, (pelletStack[self.index]), 5)
+            if 0 <= self.index < len(pelletStack):
+                p.draw.circle(sc, YELLOW, (pelletStack[self.index]), 5)
+            
 
         
 
@@ -149,6 +150,8 @@ def getDoneBool():
 def getPelletStack():
     return pelletStack
         
+def getGridCells():
+    return gridCells
 
 
 runnable = True
