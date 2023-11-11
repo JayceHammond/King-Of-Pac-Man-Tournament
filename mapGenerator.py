@@ -27,12 +27,13 @@ global doneBool
 doneBool = False
 
 class Cell:
-    def __init__(self, x, y):
+    def __init__(self, x, y, index):
         self.x = x
         self.y = y
         self.walls = {'top': True, 'right': True, 'bottom': True, 'left': True, 'pellet': True}
         self.visited = False
         self.open = False
+        self.index = index
 
     def draw(self, sc):
         global updatePellets
@@ -54,7 +55,8 @@ class Cell:
                 pelletStack.append((x + (tile // 2), y + (tile // 2)))
                 if len(pelletStack) == 200:
                     updatePellets = False
-            p.draw.circle(sc, YELLOW, (x + (tile // 2), (y + (tile // 2))), 5)
+            #if self.index != None and pelletStack[self.index]:
+                #p.draw.circle(sc, YELLOW, (pelletStack[self.index]), 5)
 
         
 
@@ -89,8 +91,14 @@ class Cell:
     
 
 
-
-gridCells = [Cell(col, row) for row in range(rows) for col in range(cols)]
+#gridCells = [Cell(col, row) for row in range(rows) for col in range(cols)]
+i = 0
+gridCells = []
+for row in range(rows):
+    for col in range(cols):
+        gridCells.append(Cell(col,row,i))
+        if i < 200:
+            i += 1
 currCell = gridCells[0]
 stack = []
 wallStack = []
