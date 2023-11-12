@@ -27,6 +27,9 @@ pacmanSheetL = p.image.load("Pac-Man Assets\Pac-Man Sprites\pacManL.png")
 pacmanSheetU = p.image.load("Pac-Man Assets\Pac-Man Sprites\pacManU.png")
 pacmanSheetD = p.image.load("Pac-Man Assets\Pac-Man Sprites\pacManD.png")
 
+pacMoveSFX = p.mixer.Sound("SFX\PacmanWakaWaka04.ogg")
+pacManBGSFX = p.mixer.Sound("SFX\Alterniabound 04 - BL1ND JUST1C3 1NV3ST1G4T1ON !! [TubeRipper.com].ogg")
+
 
 global ghostDirX
 global ghostDirY
@@ -81,19 +84,19 @@ def pacManController(xDir, yDir, currDirAnim):
     if getDoneBool() == True:
         if event.type == p.KEYDOWN:
             #CONTROLS
-            if event.key == p.K_w:
+            if event.key == p.K_UP:
                 xDir = 0
                 yDir = -1
                 pacManSpeed = 3
-            if event.key == p.K_s:
+            if event.key == p.K_DOWN:
                 xDir = 0
                 yDir = 1
                 pacManSpeed = 3
-            if event.key == p.K_d:
+            if event.key == p.K_RIGHT:
                 yDir = 0
                 xDir = 1
                 pacManSpeed = 3
-            if event.key == p.K_a:
+            if event.key == p.K_LEFT:
                 yDir = 0
                 xDir = -1
                 pacManSpeed = 3
@@ -115,44 +118,6 @@ def checkCollision(posX, posY):
 def spawnGhost(posX, posY, type):
     sc.blit(getImage(ghostSpriteSheet, type, 48, 48, 1, BLACK), (posX, posY))
 
-def moveGhost(ghostPosX, ghostPosY, ghostSpeed):
-    global ghostDirX
-    global ghostDirY
-
-    if getDoneBool() == True:
-        choice = 0
-        lock = True
-        if choice == 0:
-            if ghostDirX == 1:
-                ghostPosX += ghostSpeed * ghostDirX
-                spawnGhost(ghostPosX, ghostPosY, 0)
-            if ghostDirX == -1:
-                ghostPosX += ghostSpeed * ghostDirX
-                spawnGhost(ghostPosX, ghostPosY, 3)
-
-    #    if choice == 1:
-    #        if ghostDirY == 1:
-    #            ghostPosY += ghostSpeed * ghostDirY
-    #            spawnGhost(redGhostPosX, redGhostPosY, 1)
-    #        if ghostDirY == -1:
-    #            ghostPosY += ghostSpeed * ghostDirY
-    #            spawnGhost(redGhostPosX, redGhostPosY, 1)
-
-        if ghostPosX < 0:
-            ghostPosX = 1
-            ghostDirX *= -1
-        if ghostPosX + 48 > width:
-            ghostPosX = width - 48
-            ghostDirX *= -1
-    #    if ghostPosY < 0:
-    #        ghostPosY = 1
-    #        ghostDirY *= -1
-    #    if ghostPosY + 48 > height:
-    #        ghostPosY = height - 48
-    #        ghostDirY *= -1
-
-    return ghostPosX
-
 
 currDirAnim = pacmanSheetU
 xDir = 0
@@ -160,12 +125,24 @@ yDir = 0
 #ghost = Ghost(48, 48)
 ghostSpriteSheet = p.image.load("Pac-Man Assets\Ghosts\GhostSpriteSheet.png")
 
+
+ghosts = [
+    Ghost(1152, 0, ghostSpriteSheet, redGhostSpeed),
+    Ghost(1152, 545, ghostSpriteSheet, redGhostSpeed),
+    Ghost(0, 545, ghostSpriteSheet, redGhostSpeed),
+    #Ghost(r.randint(0, width), r.randint(0, height), ghostSpriteSheet, redGhostSpeed)
+]
+
+pacManBGSFX.play(1)
 while True:
     sc.fill(p.Color(BLUE))
 
     for event in p.event.get():
         if event.type == p.QUIT:
             exit()
+        if event.type == p.KEYDOWN:
+            if event.key == p.K_ESCAPE:
+                exit()
         xDir, yDir, currDirAnim = pacManController(xDir, yDir, currDirAnim)
 
 
@@ -184,7 +161,7 @@ while True:
 
     wallStack = mapMain(sc, pacManPos)
     pacmanCol = p.draw.rect(sc, BLACK, (pacManPosX + 5, pacManPosY, 45, 45), 1)
-    redGhostCol = p.draw.rect(sc, BLACK, (redGhostPosX + 5, redGhostPosY, 45, 45), 1)
+    #redGhostCol = p.draw.rect(sc, BLACK, (redGhostPosX + 5, redGhostPosY, 45, 45), 1)
     if wallStack != None:
         for wall in wallStack:
             if pacmanCol.colliderect(wall):
@@ -201,28 +178,23 @@ while True:
                     pacManSpeed = 0
                     pacManPosY += 3
 
-            if redGhostCol.colliderect(wall):
-                if xDir == 1:
-                    redGhostSpeed = 0
-                    redGhostPosX -= 3
-                elif xDir == -1:
-                    redGhostSpeed = 0
-                    redGhostPosX += 3
-                elif yDir == 1:
-                    redGhostSpeed = 0
-                    redGhostPosY -= 3
-                elif yDir == -1:
-                    redGhostSpeed = 0
-                    redGhostPosY += 3
-
         for pellet in pelletStack:
-            if pacmanCol.collidepoint(pellet):
+            if pacmanCol.collidepoint(pellet) and gridCells[pelletStack.index(pellet)].walls['pellet'] == True:
                 gridCells[pelletStack.index(pellet)].walls['pellet'] = False
+                pacMoveSFX.play(0)
+                
+                
+                
+            
+        
 
+
+    for ghost in ghosts:
+        ghost.move(gridCells)
+        ghost.draw(sc)
     
 
     checkCollision(pacManPosX, pacManPosY)
-    redGhostPosX = moveGhost(redGhostPosX, redGhostPosY, redGhostSpeed)
     pacManPos = (pacManPosX, pacManPosY)
     animator(currDirAnim, 48, 48, 1, BLACK, pacManPos)
     
