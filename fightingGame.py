@@ -1,6 +1,6 @@
 import pygame as p
 import sys
-from player1 import Player
+from Fighter import Player
 
 
 # Define some colors
@@ -36,6 +36,7 @@ bgImgArr = [
 ]
 
 
+
 # Create the screen
 screen = p.display.set_mode((WIDTH, HEIGHT))
 p.display.set_caption("Fighting Game")
@@ -45,8 +46,8 @@ bg_frames = [p.image.load(img_path).convert() for img_path in bgImgArr]
 current_frame = 0
 
 # Create players using the Player class
-player1 = Player(50, 550, 50, 50, RED)
-player2 = Player(700, 550, 50, 50, BLUE)
+player1 = Player(50, 450, 50, 50, RED)
+player2 = Player(700, 450, 50, 50, BLUE)
 
 # Set up clock
 clock = p.time.Clock()
@@ -59,6 +60,7 @@ def draw_background():
     else:
         screen.blit(lastframe, (0,0))
 
+
 # Game loop
 while True:
     for event in p.event.get():
@@ -68,17 +70,22 @@ while True:
 
     # Handle player input using the Player class methods
     keys = p.key.get_pressed()
-    player1.sideInput(keys)
+    player1.sideInput(event, keys)
     player1.jumpInput(keys)
     #player2.handle_input(keys)
+
+    if player1.rect.colliderect(player2.rect) and keys[p.K_RIGHT]:
+        player2.rect.x += 5
+    if player1.rect.colliderect(player2.rect) and keys[p.K_LEFT]:
+        player2.rect.x -= 5
 
     # Update game logic here (e.g., collision detection, health, etc.)
 
     draw_background()
 
     # Draw everything using the Player class methods
-    player1.draw(screen)
-    player2.draw(screen)
+    player1.drawPac(screen)
+    player2.drawGhost(screen)
 
     # Update the display
     p.display.flip()
