@@ -5,8 +5,10 @@ import sys
 pacmanSpriteSheet = p.image.load("Pac-Man Assets/Pac-Man Sprites/PacFightSprites/pacMoveSet.png")
 
 
-global frameNum
-global frameCount
+global frameNum, frameCount, flip, inputTimer
+inputTimer = 0
+flip = False
+press = False
 frameNum = 0
 frameCount = 0
 
@@ -31,33 +33,35 @@ isBlocking = False
 
 
 class Player:
-    def __init__(self, x, y, width, height, color):
+    def __init__(self, x, y, width, height, color, health):
         self.rect = p.Rect(x, y, width, height)
         self.color = color
         self.isJumping = False
         self.jumpCount = 10
+        self.state = "Idle"
+        self.health = health
+        self.name = "player"
 
     def sideInput(self, event, keys):
-        global moveLeft, moveRight, isIdle
+        global flip, inputTimer, press
         if keys[p.K_LEFT]:
+            inputTimer = (p.time.get_ticks() / 1000)
+            print(inputTimer)
             self.rect.x -= 5
-            isIdle = False
-            moveRight = False
-            moveLeft = True
+            self.state = "LeftW"
+            flip = True
         elif keys[p.K_RIGHT]:
             self.rect.x += 5
-            isIdle = False
-            moveRight = True
+            self.state = "RightW"
+            flip = False
         else:
-            isIdle = True
+            self.state = "idle"
 
         if event.type == p.KEYUP:
             if keys[p.K_LEFT]:
-                moveLeft = False
-                isIdle = True
+                self.state = "idle"
             if keys[p.K_RIGHT]:
-                moveRight = False
-                isIdle = True
+                self.state = "idle"
 
         if self.rect.x <= 0:
             self.rect.x = 1
@@ -70,6 +74,7 @@ class Player:
         if not self.isJumping:
             if keys[p.K_UP]:
                 self.isJumping = True
+                #self.state = "jump"
         else:
             if self.jumpCount >= -10:
                 neg = 1
@@ -93,16 +98,28 @@ class Player:
     def animator(self, sheet, spriteWidth, spriteHeight, scalar, color, pos, sc, frameStart, frameEnd, rate):
         global frameNum
         global frameCount
+        frameInc = 0
         #show frame img
-        sc.blit(self.getImage(sheet, frameNum, spriteWidth, spriteHeight, scalar, color), pos)
-        if frameCount == frameStart:
+        frame = self.getImage(sheet, frameNum, spriteWidth, spriteHeight, scalar, color)
+        
+        if flip == True:
+            flipFrame = p.transform.flip(frame, 1, 0)
+            sc.blit(flipFrame, pos)
+        if flip == False:
+            sc.blit(frame, pos)
+        frameCount += 1
+        if frameCount == frameEnd:
             frameNum += 1
+            #print("HELP")
         if frameNum > frameEnd:
             frameNum = frameStart
 
-        frameCount += 1
-        if frameCount == rate:
+        if frameCount > rate:
             frameCount = frameStart
+        print(self.state)
+        #print(frameCount)
+        #print("FrameNum: " + str(frameNum))
+        #print("FrameEnd: " + str(frameEnd))
 
     #def crouchInput(self, keys):
         #if keys[p.K_DOWN]:
@@ -111,9 +128,16 @@ class Player:
     def drawPac(self, screen):
         global frameNum
         #p.draw.rect(screen, self.color, self.rect)
-        if moveRight:
-            self.animator(pacmanSpriteSheet, 27, 40, 3.7, BLACK, (self.rect.x, self.rect.y), screen, 2, 7, 18)
-        if isIdle:
+        if self.state == "RightW":
+            #frameNum = 2
+            self.animator(pacmanSpriteSheet, 27, 40, 3.7, BLACK, (self.rect.x, self.rect.y), screen, 2, 7, 9)
+        elif self.state == "LeftW":
+            #frameNum = 2
+            self.animator(pacmanSpriteSheet, 27, 40, 3.7, BLACK, (self.rect.x, self.rect.y), screen, 2, 7, 9)
+        elif self.state == "jump":
+            self.animator(pacmanSpriteSheet, 27, 40, 3.7, BLACK, (self.rect.x, self.rect.y), screen, 19, 21, 1)
+        else:
+            #frameNum = 0
             self.animator(pacmanSpriteSheet, 27, 40, 3.7, BLACK, (self.rect.x, self.rect.y), screen, 0, 1, 24)
 
     def drawGhost(self, screen):

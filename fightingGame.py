@@ -1,6 +1,7 @@
 import pygame as p
 import sys
 from Fighter import Player
+from healthbar import HealthBar
 
 
 # Define some colors
@@ -16,8 +17,12 @@ FROYALBLUE = (79, 132, 166)
 BLUE = (65, 105, 225)
 
 
+global healthbar, health
+
 # Initialize Pygame
 p.init()
+healthBar = HealthBar(0, 0, 200)
+
 
 # Constants
 WIDTH, HEIGHT = 1200, 600
@@ -46,8 +51,8 @@ bg_frames = [p.image.load(img_path).convert() for img_path in bgImgArr]
 current_frame = 0
 
 # Create players using the Player class
-player1 = Player(50, 450, 50, 50, RED)
-player2 = Player(700, 450, 50, 50, BLUE)
+player1 = Player(50, 450, 50, 50, RED, 200)
+player2 = Player(700, 450, 50, 50, BLUE, 100)
 
 # Set up clock
 clock = p.time.Clock()
@@ -74,6 +79,9 @@ while True:
     player1.jumpInput(keys)
     #player2.handle_input(keys)
 
+    if player1.isJumping:
+        player1.state = "jump"
+
     if player1.rect.colliderect(player2.rect) and keys[p.K_RIGHT]:
         player2.rect.x += 5
     if player1.rect.colliderect(player2.rect) and keys[p.K_LEFT]:
@@ -82,9 +90,11 @@ while True:
     # Update game logic here (e.g., collision detection, health, etc.)
 
     draw_background()
+    healthBar.displayHealth(screen)
 
     # Draw everything using the Player class methods
     player1.drawPac(screen)
+    #print(player1.state)
     player2.drawGhost(screen)
 
     # Update the display

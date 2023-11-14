@@ -4,6 +4,7 @@ import random as r
 from random import choice
 from mapGenerator import mapMain, getDoneBool, getGridCells, getPelletStack
 from ghost import Ghost
+from Fighter import Player
 
 # Define some colors
 BLACK = (0, 0, 0)
@@ -33,6 +34,8 @@ pacManBGSFX = p.mixer.Sound("SFX\Alterniabound 04 - BL1ND JUST1C3 1NV3ST1G4T1ON 
 
 global ghostDirX
 global ghostDirY
+global health
+health = 100
 ghostDirY = 1
 ghostDirX = 1
 wanderChoice = [ghostDirX, ghostDirY]
@@ -117,6 +120,7 @@ def checkCollision(posX, posY):
 
 def spawnGhost(posX, posY, type):
     sc.blit(getImage(ghostSpriteSheet, type, 48, 48, 1, BLACK), (posX, posY))
+    
 
 
 currDirAnim = pacmanSheetU
