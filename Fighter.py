@@ -1,11 +1,18 @@
 import pygame as p
 import sys
+from healthbar import HealthBar
 
 
 pacmanSpriteSheet = p.image.load("Pac-Man Assets/Pac-Man Sprites/PacFightSprites/pacMoveSet.png")
+brolyTransformation = p.image.load("FightingGameAssets/broly transformation.png")
+brolyIdle = p.image.load("FightingGameAssets/Broly Idle.png")
 
 
-global frameNum, frameCount, flip, inputTimer
+global flip, inputTimer
+global i, j, done
+done = False
+i, j = 0, 0
+#frameNum, frameCount,
 inputTimer = 0
 flip = False
 press = False
@@ -39,8 +46,12 @@ class Player:
         self.isJumping = False
         self.jumpCount = 10
         self.state = "Idle"
-        self.health = health
+        self.healthNum = health
+        self.healthBar = HealthBar(0, 0, 200)
         self.name = "player"
+        self.frameNum = 0
+        self.frameCount = 0
+        self.flip = False
 
     def sideInput(self, event, keys):
         global flip, inputTimer, press
@@ -49,11 +60,11 @@ class Player:
             print(inputTimer)
             self.rect.x -= 5
             self.state = "LeftW"
-            flip = True
+            self.flip = True
         elif keys[p.K_RIGHT]:
             self.rect.x += 5
             self.state = "RightW"
-            flip = False
+            self.flip = False
         else:
             self.state = "idle"
 
@@ -69,6 +80,10 @@ class Player:
             self.rect.x = 1199
         if self.rect.y >= 470:
             self.rect.y = 469
+
+    def attackInput(self, event, keys):
+        if keys[p.K_z]:
+            self.state = "light"
 
     def jumpInput(self, keys):
         if not self.isJumping:
@@ -86,37 +101,37 @@ class Player:
                 self.isJumping = False
                 self.jumpCount = 10
 
-    def getImage(self, sheet, frame, width, height, scale, color):
+    def getImage(self, sheet, frame, width, height, scale, color, row):
         image = p.Surface((width, height))
-        image.blit(sheet, (0,0), ((frame * width), 0, width, height))
+        image.blit(sheet, (0,0), ((frame * width), (row * height), width, height))
         image = p.transform.scale(image, (width * scale, height * scale))
         image.set_colorkey(color)
 
         return image.convert_alpha()
 
 
-    def animator(self, sheet, spriteWidth, spriteHeight, scalar, color, pos, sc, frameStart, frameEnd, rate):
-        global frameNum
-        global frameCount
-        frameInc = 0
+    def animator(self, sheet, spriteWidth, spriteHeight, scalar, color, pos, sc, frameStart, frameEnd, rate, row):
+        #global frameNum
+        #global frameCount
+        #frameInc = 0
         #show frame img
-        frame = self.getImage(sheet, frameNum, spriteWidth, spriteHeight, scalar, color)
+        frame = self.getImage(sheet, self.frameNum, spriteWidth, spriteHeight, scalar, color, row)
         
-        if flip == True:
+        if self.flip == True and self.name == "player":
             flipFrame = p.transform.flip(frame, 1, 0)
             sc.blit(flipFrame, pos)
-        if flip == False:
+        if self.flip == False :
             sc.blit(frame, pos)
-        frameCount += 1
-        if frameCount == frameEnd:
-            frameNum += 1
+        self.frameCount += 1
+        if self.frameCount == frameEnd:
+            self.frameNum += 1
             #print("HELP")
-        if frameNum > frameEnd:
-            frameNum = frameStart
+        if self.frameNum > frameEnd:
+            self.frameNum = frameStart
 
-        if frameCount > rate:
-            frameCount = frameStart
-        print(self.state)
+        if self.frameCount > rate:
+            self.frameCount = frameStart
+        #print(self.state)
         #print(frameCount)
         #print("FrameNum: " + str(frameNum))
         #print("FrameEnd: " + str(frameEnd))
@@ -126,19 +141,37 @@ class Player:
          #   self.rect.y += 5
 
     def drawPac(self, screen):
-        global frameNum
+        #global frameNum
         #p.draw.rect(screen, self.color, self.rect)
         if self.state == "RightW":
             #frameNum = 2
-            self.animator(pacmanSpriteSheet, 27, 40, 3.7, BLACK, (self.rect.x, self.rect.y), screen, 2, 7, 9)
-        elif self.state == "LeftW":
+            self.animator(pacmanSpriteSheet, 27, 40, 3.7, BLACK, (self.rect.x, self.rect.y), screen, 2, 7, 9, 0)
+        if self.state == "LeftW":
             #frameNum = 2
-            self.animator(pacmanSpriteSheet, 27, 40, 3.7, BLACK, (self.rect.x, self.rect.y), screen, 2, 7, 9)
-        elif self.state == "jump":
-            self.animator(pacmanSpriteSheet, 27, 40, 3.7, BLACK, (self.rect.x, self.rect.y), screen, 19, 21, 1)
-        else:
+            self.animator(pacmanSpriteSheet, 27, 40, 3.7, BLACK, (self.rect.x, self.rect.y), screen, 2, 7, 9, 0)
+        if self.state == "jump":
+            self.animator(pacmanSpriteSheet, 27, 40, 3.7, BLACK, (self.rect.x, self.rect.y), screen, 0, 2, 9, 1)
+        if self.state == "light":
+            self.animator(pacmanSpriteSheet, 54, 40, 3.7, BLACK, (self.rect.x, self.rect.y), screen, 0, 1, 18, 5)
+        if self.state == "idle":
             #frameNum = 0
-            self.animator(pacmanSpriteSheet, 27, 40, 3.7, BLACK, (self.rect.x, self.rect.y), screen, 0, 1, 24)
+            self.animator(pacmanSpriteSheet, 27, 40, 3.7, BLACK, (self.rect.x, self.rect.y), screen, 0, 1, 24, 0)
 
     def drawGhost(self, screen):
-        p.draw.rect(screen, self.color, self.rect)
+        global i, j, done 
+        #p.draw.rect(screen, self.color, self.rect)
+        
+        if not done:
+            if self.frameNum != 4:
+                self.animator(p.transform.flip(brolyTransformation, 1, 0), 143, 204, 1, BLACK, (self.rect.x, self.rect.y), screen, 0, 4, 9, i)
+            if self.frameNum == 4:
+                self.frameNum = 0
+                i += 1
+            if self.frameNum == 1 and i == 3:
+                done = True
+        else:
+            self.animator(p.transform.flip(brolyIdle, 1, 0), 143, 204, 1, BLACK, (self.rect.x, self.rect.y), screen, 0, 4, 9, j)
+            if j == 1:
+                j = 0
+            if self.frameNum == 4:
+                j += 1
